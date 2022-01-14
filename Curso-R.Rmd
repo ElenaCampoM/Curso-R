@@ -1,48 +1,105 @@
 ---
 title: "Entrega práctica general curso R"
-author: "Elena Campo Montalvo - 15-01-2022 - "
-output: github_document
+author: "Elena Campo Montalvo - 15-01-2022 -"
+output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r Setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Trabajo con los datos de **`palmerpenguins`**
+# Trabajo con  datos de **`palmerpenguins`**
 
 Se analizan datos de 344 pingüinos de tres especies distintas donde la base "penguins" contiene información de la isla, la longitud y profundidad del pico (mm), longitud de la aleta, tamaño, sexo.
 
-```{r}
-install.packages("palmerpenguins", rep, os = "http://cran.us.r-project.org")
+![Figura: Longitud y profundidad del pico del pingüino](images/paste-2D8009DE.png "Pingüino"){width="350"}
+
+## Instalación del paquete, carga de la biblioteca y de los datos
+
+```{r Penguin_package, results='hide'}
+install.packages("palmerpenguins", repos = "http://cran.us.r-project.org")
 library(palmerpenguins)
 data(package = 'palmerpenguins')
+pinguinos_df <- palmerpenguins::penguins
 ```
 
-
-## (1) Número de individuos totales, masculinos y femeninos por especie. La media, desviación estándar, valor mínimo y máximo de la longitud y profundidad del pico, la longitud de la aleta y el tamaño.
-
-\(2\) Un gráfico de barras que represente el número de individuos muestreados de cada especie en cada isla, representando las especies en diferentes colores (chinstrap – morado, gentoo – azul, adelie – naranja). Contesta a las siguientes preguntas: ¿qué especie se ha muestreado en las tres islas? ¿cuántos individuos se han muestreado de la isla Dream?
-
-\(3\) Un gráfico multipanel de cajas y bigotes del tamaño de los pingüinos según su sexo, donde aparezca un panel para cada especie. Contesta a las siguientes preguntas: ¿qué especie tiene mayor tamaño? ¿en qué especie las hembras y los machos tienen un tamaño más similar? Envíanos un documento de Word donde aparezca el enlace al documento html y tu nombre a través de la entrega programada en el aula virtual.
-
-## GitHub Documents
-
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
-
-## Including Code
-
-You can include R code in the document as follows:
-
-```{r cars}
-summary(cars)
+```{r Cabecera de la tabla}
+head(pinguinos_df)
 ```
 
-## Including Plots
+## Ejercicio 1
 
-You can also embed plots, for example:
+> Calcular el número de individuos totales, masculinos y femeninos por especie.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r Tabla de individuos}
+table(pinguinos_df$sex, pinguinos_df$species)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+> Calcular la media, desviación estándar, valor mínimo y máximo de la longitud y profundidad del pico, la longitud de la aleta y el tamaño.
+
+```{r Estadística}
+campos <- c("Media", "Desviación estándar", "Mínimo", "Máximo")
+
+long_pico <- c(mean(na.omit(pinguinos_df$bill_length_mm)), sd(na.omit(pinguinos_df$bill_length_mm)), min(na.omit(pinguinos_df$bill_length_mm)), max(na.omit(pinguinos_df$bill_length_mm)))
+
+prof_pico <- c(mean(na.omit(pinguinos_df$bill_depth_mm)), sd(na.omit(pinguinos_df$bill_depth_mm)), min(na.omit(pinguinos_df$bill_depth_mm)), max(na.omit(pinguinos_df$bill_depth_mm)))
+
+long_aleta <- c(mean(na.omit(pinguinos_df$flipper_length_mm)), sd(na.omit(pinguinos_df$flipper_length_mm)), min(na.omit(pinguinos_df$flipper_length_mm)), max(na.omit(pinguinos_df$flipper_length_mm)))
+
+peso <- c(mean(na.omit(pinguinos_df$body_mass_g)), sd(na.omit(pinguinos_df$body_mass_g)), min(na.omit(pinguinos_df$body_mass_g)), max(na.omit(pinguinos_df$body_mass_g)))
+
+# Se construye la matriz de resultados
+resultados <- rbind(campos, long_pico, prof_pico,long_aleta, peso)
+
+resultados
+```
+
+## Ejercicio 2
+
+> Instalar paquete `ggplot2` y cargarlo en memoria. También paquetes para la utillización del addin 'ggplotAssist'
+
+```{r Paquete ggplot2 y ggplotAssist, results='hide', cache=FALSE}
+install.packages("ggplot2", repos = "http://cran.us.r-project.org")
+library(ggplot2)
+```
+
+```{r}
+devtools::install_github("cardiomoon/editData")
+devtools::install_github("cardiomoon/ggplotAssist")
+```
+
+> Realizar un gráfico de barras que represente el número de individuos muestreados de cada especie en cada isla, representando las especies en diferentes colores (chinstrap -- morado, gentoo -- azul, adelie -- naranja).
+
+```{r Grafico de barras}
+ggplot(data = pinguinos_df, aes(x=island, fill = species)) +
+  geom_bar() +     
+  labs(x="Isla", y="Nº de pingüinos") +
+  geom_text(aes(label=..count..),stat='count',position=position_stack()) +
+  scale_fill_manual (values = c("Adelie" = "orange", "Chinstrap" = "purple", "Gentoo" = "blue"))
+
+```
+
+> Contesta a las siguientes preguntas: ¿qué especies se han muestreado en las tres islas? ¿cuántos individuos se han muestreado de la isla Dream?
+
+Observando la gráfica, se obtiene que se han muestreado las especies Adelie, Chinstrap y Gentoo en las tres islas.
+
+El total de individuos de la isla Dream,de las especies Adelie y Chinstrap, es 124.
+
+### Ejercicio 3
+
+> Crear un gráfico multipanel de cajas y bigotes del tamaño de los pingüinos según su sexo, donde aparezca un panel para cada especie.
+
+```{r}
+ggplot(data = na.omit(pinguinos_df)) +
+  geom_boxplot(aes(y = body_mass_g, x=sex)) +
+  facet_grid(cols=vars(species)) + 
+  labs(x="Isla", y="Nº de pingüinos") 
+```
+
+> Contesta a las siguientes preguntas:
+>
+> ¿Qué especie tiene mayor tamaño? ¿En qué especie las hembras y los machos tienen un tamaño más similar?
+
+-   La especie de mayor tamaño es la *Gentoo*.
+
+-   La especie en la que las hembras y los machos tienen un tamaño similar es la *Chinstrap*.
