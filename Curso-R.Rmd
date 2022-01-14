@@ -1,7 +1,14 @@
 ---
 title: "Entrega práctica general curso R"
 author: "Elena Campo Montalvo - 15-01-2022 -"
-output: html_document
+output: 
+  pdf_document: 
+    fig_caption: yes
+    number_sections: yes
+  html_document: 
+    toc: yes
+    fig_caption: yes
+    number_sections: yes
 ---
 
 ```{r Setup, include=FALSE}
@@ -85,7 +92,7 @@ Observando la gráfica, se obtiene que se han muestreado las especies Adelie, Ch
 
 El total de individuos de la isla Dream,de las especies Adelie y Chinstrap, es 124.
 
-### Ejercicio 3
+## Ejercicio 3
 
 > Crear un gráfico multipanel de cajas y bigotes del tamaño de los pingüinos según su sexo, donde aparezca un panel para cada especie.
 
